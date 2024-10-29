@@ -70,8 +70,26 @@ class CustomFieldsForm extends BaseProfileForm
             case 'datetime':
                 return self::createDateTimePicker($fieldKey, $field);
             default:
-                return null;
+                return self::createFieldFromString($fieldKey, $field);
         }
+    }
+
+    private static function createFieldFromString(string $fieldKey, array $field): ?Forms\Components\Component
+    {
+       try {
+
+            $class = \Illuminate\Support\Str::camel($field['type']);
+            $class = "Filament\Forms\Components\\{$class}";
+
+            return $class::make($fieldKey)
+                ->label(__($field['label']))
+                ->placeholder(__($field['placeholder']))
+                ->required($field['required'])
+                ->rules($field['rules']);
+
+       } catch (Throwable $exception) {
+           return null;
+       }
     }
 
     private static function createTextInput(string $fieldKey, array $field): TextInput
